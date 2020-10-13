@@ -2,9 +2,9 @@
 // http://localhost:3000/isolated/exercise/04.js
 
 import React from 'react'
-import { useLocalStorageState } from '../utils'
+import {useLocalStorageState} from '../utils'
 
-function Board({ onClick, squares }) {
+function Board({onClick, squares}) {
   function renderSquare(i) {
     return (
       <button className="square" onClick={() => onClick(i)}>
