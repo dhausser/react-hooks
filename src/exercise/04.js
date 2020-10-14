@@ -35,39 +35,48 @@ function Board({onClick, squares}) {
 }
 
 function Game() {
-  const [currentSquares, setSquares] = useLocalStorageState(
-    'squares',
+  const [history, setHistory] = useLocalStorageState('tic-tac-toe:history', [
     Array(9).fill(null),
-  )
-  const [history, setHistory] = useLocalStorageState('history', [
-    currentSquares,
   ])
+  const [currentStep, setCurrentStep] = useLocalStorageState(
+    'tic-tac-toe:step',
+    0,
+  )
 
-  const nextValue = calculateNextValue(currentSquares)
+  const currentSquares = history[currentStep]
   const winner = calculateWinner(currentSquares)
+  const nextValue = calculateNextValue(currentSquares)
   const status = calculateStatus(winner, currentSquares, nextValue)
-  const moves = calculateMoves(history, travelTime)
-
-  function travelTime(i) {
-    setSquares(history[i])
-    setHistory(history.slice(0, i + 1))
-  }
 
   function selectSquare(square) {
     if (winner || currentSquares[square]) {
       return
     }
-    const squaresCopy = [...currentSquares]
-    squaresCopy[square] = nextValue
-    setSquares(squaresCopy)
-    setHistory([...history, squaresCopy])
+
+    const newHistory = history.slice(0, currentStep + 1)
+    const squares = [...currentSquares]
+
+    squares[square] = nextValue
+    setHistory([...history, squares])
+    setCurrentStep(newHistory.length)
   }
 
   function restart() {
-    const initialSquares = Array(9).fill(null)
-    setSquares(initialSquares)
-    setHistory([initialSquares])
+    setHistory([Array(9).fill(null)])
+    setCurrentStep(0)
   }
+
+  const moves = history.map((stepSquares, step) => {
+    const desc = step ? `Go to move #${step}` : 'Go to game start'
+    const isCurrentStep = step === currentStep
+    return (
+      <li key={step}>
+        <button disabled={isCurrentStep} onClick={() => setCurrentStep(step)}>
+          {desc} {isCurrentStep ? '(current)' : null}
+        </button>
+      </li>
+    )
+  })
 
   return (
     <div className="game">
@@ -78,25 +87,11 @@ function Game() {
         </button>
       </div>
       <div className="game-info">
-        <div className="status">{status}</div>
+        <div>{status}</div>
         <ol>{moves}</ol>
       </div>
     </div>
   )
-}
-
-function calculateMoves(history, travelTime) {
-  return history.map((step, i) => {
-    const current = history.length - 1 === i
-    return (
-      <li key={`${JSON.stringify(step)}${i}`}>
-        <button disabled={current} onClick={() => travelTime(i)}>
-          {i === 0 ? 'Go to game start' : `Go to move #${i}`}
-          {current ? ' (current)' : ''}
-        </button>
-      </li>
-    )
-  })
 }
 
 // eslint-disable-next-line no-unused-vars
