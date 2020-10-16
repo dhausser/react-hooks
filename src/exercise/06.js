@@ -45,6 +45,8 @@ function PokemonInfo({pokemonName}) {
   } else if (state.status === 'resolved') {
     return <PokemonDataView pokemon={state.pokemon} />
   }
+
+  throw new Error('This should be impossible')
 }
 
 function App() {
